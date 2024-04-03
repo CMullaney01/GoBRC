@@ -13,3 +13,11 @@ Two threads. Unlike our C++ attempt we have some sexy go channels to use I am go
 achieved: 1m41.520s
 
 No improvement!?
+
+# Attempt - 3
+
+We implemented similar to our c++ implementation.
+
+achieved: 13.7 seconds
+
+how the hell do people do this in less than 2 seconds?

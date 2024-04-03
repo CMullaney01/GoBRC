@@ -37,7 +37,8 @@ func updateMap(cityList map[string]*CityInfo, cityName string, temperature int) 
 }
 
 func parseChunk(chunkData *mmap.MMap, cityList map[string]*CityInfo, start, end, fileSize int) {
-	fmt.Println(start, end)
+	// fmt.Println(start, end)
+
 	// Forward to start of next line
 	for (start != 0) && ((*chunkData)[start-1] != '\n') {
 		start++
@@ -52,9 +53,9 @@ func parseChunk(chunkData *mmap.MMap, cityList map[string]*CityInfo, start, end,
 		}
 
 		// Extract city name from chunkData slice
-		cityName = string((*chunkData)[start:endIndex])
+		cityName = string((*chunkData)[start + 1:endIndex])
 		start = endIndex + 1 // Move past the ';' character
-		fmt.Println(cityName)
+		// fmt.Println(cityName)
 		tmp := []byte{}
 		// Extract temperature until '\n' character
 		// asssumes that the last line ends with \n
@@ -67,7 +68,7 @@ func parseChunk(chunkData *mmap.MMap, cityList map[string]*CityInfo, start, end,
 
 		// Convert temperature bytes to integer
 		temperature, err := strconv.Atoi(string(tmp))
-		fmt.Println(temperature)
+		// fmt.Println(temperature)
 		if err != nil {
 			fmt.Println("Error converting temperature to integer:", err)
 			continue
@@ -118,14 +119,14 @@ func printCityList(cityList map[string]*CityInfo) {
 
 	for _, city := range keys {
 		info := cityList[city]
-		min_temp :=  float64(info.Min) / 10
+		min_temp := float64(info.Min) / 10
 		max_temp := float64(info.Max) / 10
+		average_temp := (float64(info.Sum) / float64(info.Count)) / 10
 
-		fmt.Printf("City: %s\n", city)
-		fmt.Printf("Min temperature: %d\n", min_temp)
-		fmt.Printf("Max temperature: %d\n", max_temp)
-		fmt.Printf("Average temperature: %.2f\n", (float64(info.Sum)/float64(info.Count)) / 10)
-		fmt.Println()
+		fmt.Printf("City: %s ", city)
+		fmt.Printf("Min: %.1f ", min_temp)
+		fmt.Printf("Mean: %.1f ", average_temp)
+		fmt.Printf("Max: %.1f \n", max_temp)
 	}
 }
 
@@ -155,7 +156,7 @@ func main() {
     }
     defer data.Unmap()
 
-	num_chunks := 1
+	num_chunks := 32
 	chunkSize := int(fileSize) / num_chunks
 	dataPtr := &data
     var wg sync.WaitGroup
@@ -172,7 +173,7 @@ func main() {
 		end := (i + 1) * chunkSize
 		if i == num_chunks-1 {
 			// Last chunk might be smaller if the file size is not evenly divisible
-			end = int(fileSize)
+			end = int(fileSize) - 1
 		}
 
 		wg.Add(1)
